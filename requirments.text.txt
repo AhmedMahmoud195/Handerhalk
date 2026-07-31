@@ -1,9 +1,0 @@
-streamlit
-pandas
-numpy
-scikit-learn
-lightgbm
-tensorflow
-plotly
-huggingface-hub
-kagglehub
