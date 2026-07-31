@@ -35,11 +35,21 @@ st.markdown("""
 # ------------------------------------------------------------------------------
 # 2. Setup HuggingFace Inference Client
 # ------------------------------------------------------------------------------
-HF_TOKEN = os.getenv("HF_TOKEN", "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")
+HF_TOKEN = None
 try:
-    client = InferenceClient(api_key=HF_TOKEN) if HF_TOKEN else None
+    if "HF_TOKEN" in st.secrets:
+        HF_TOKEN = st.secrets["HF_TOKEN"]
 except Exception:
-    client = None
+    HF_TOKEN = os.getenv("HF_TOKEN")
+
+# إنشاء الـ Client بمرونة
+client = None
+if HF_TOKEN:
+    try:
+        # بنبصي التوكين مباشر للمكتبة
+        client = InferenceClient(token=HF_TOKEN)
+    except Exception as e:
+        client = None
 
 # ------------------------------------------------------------------------------
 # 3. Safe Load Artifacts
