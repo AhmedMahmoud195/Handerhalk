@@ -35,7 +35,7 @@ st.markdown("""
 # ------------------------------------------------------------------------------
 # 2. Setup HuggingFace Inference Client
 # ------------------------------------------------------------------------------
-HF_TOKEN = os.getenv("HF_TOKEN", "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")
+HF_TOKEN = os.getenv("HF_TOKEN", "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")
 try:
     client = InferenceClient(api_key=HF_TOKEN) if HF_TOKEN else None
 except Exception:
