@@ -4,6 +4,6 @@ numpy
 scikit-learn
 lightgbm
 tensorflow
-plotly
+plotly.express
 huggingface-hub
 kagglehub
