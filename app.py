@@ -4,9 +4,10 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from huggingface_hub import InferenceClient
 
 # ------------------------------------------------------------------------------
-# 1. Page Configuration
+# 1. Page Configuration & Custom Styling
 # ------------------------------------------------------------------------------
 st.set_page_config(
     page_title="Handeerhalk - Inventory & Delivery Engine",
@@ -14,7 +15,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom Styling
 st.markdown("""
     <style>
     div[data-testid="stMetric"] {
@@ -33,7 +33,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
-# 2. Safe Load Artifacts
+# 2. Setup HuggingFace Inference Client
+# ------------------------------------------------------------------------------
+HF_TOKEN = os.getenv("HF_TOKEN", "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")
+try:
+    client = InferenceClient(api_key=HF_TOKEN) if HF_TOKEN else None
+except Exception:
+    client = None
+
+# ------------------------------------------------------------------------------
+# 3. Safe Load Artifacts
 # ------------------------------------------------------------------------------
 @st.cache_resource
 def load_artifacts():
@@ -60,7 +69,7 @@ state_delay_rates = artifacts.get("state_delay_rates", pd.DataFrame())
 global_delay_mean = artifacts.get("global_delay_mean", 0.1)
 
 # ------------------------------------------------------------------------------
-# 3. Sidebar Navigation
+# 4. Sidebar Navigation
 # ------------------------------------------------------------------------------
 st.sidebar.title("Handeerhalk Engine")
 st.sidebar.caption("Smart E-Commerce & Inventory Optimization Engine")
@@ -81,7 +90,6 @@ if menu_option == "Main Dashboard":
 
     st.markdown("---")
     
-    # 1. تقسيم الشاشة لعمودين (2/3 للرسمة البيانية و 1/3 للذكاء الاصطناعي)
     c1, c2 = st.columns([2, 1])
     
     with c1:
@@ -98,7 +106,6 @@ if menu_option == "Main Dashboard":
             )
             st.plotly_chart(fig, use_container_width=True)
 
-    # 2. إضافة جزء الـ AI Assistant في العمود الثاني
     with c2:
         st.subheader("🤖 Quick AI Logistics Assistant")
         user_query = st.text_input("Ask AI Assistant:", "How can we reduce delay rates in distant states?")
@@ -114,6 +121,8 @@ if menu_option == "Main Dashboard":
                         st.success(response.choices[0].message.content)
                     except Exception as e:
                         st.error(f"HF API Error: {e}")
+            else:
+                st.warning("HuggingFace Client is not initialized.")
 
 # ------------------------------------------------------------------------------
 # Tab 2: Prediction & Regional Stock Allocation
@@ -152,7 +161,6 @@ elif menu_option == "Prediction & Stock Allocation":
             matched_state = state_delay_rates[state_delay_rates["customer_state"] == selected_state] if not state_delay_rates.empty else pd.DataFrame()
             avg_delay_risk = (matched_state["customer_state_delay_rate"].values[0] if not matched_state.empty else global_delay_mean) * 100
             
-            # 🎯 [التعديل هنا] حساب المبيعات الفعلية المجمعة بدلاً من الرقم العشوائي
             if not category_season_shares.empty:
                 state_season_units = category_season_shares[
                     (category_season_shares['customer_state'] == selected_state) & 
